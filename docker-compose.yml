@@ -1,0 +1,73 @@
+services:
+
+  # ── SERVICIO 1: PostgreSQL ──────────────────────────────
+  postgres:
+    image: postgres:15
+    container_name: biblioteca_postgres
+    environment:
+      POSTGRES_DB: biblioteca_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Admin123*
+    ports:
+      - "5434:5432"
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d   # ejecuta los .sql al iniciar
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - biblioteca_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── SERVICIO 2: MongoDB ─────────────────────────────────
+  mongodb:
+    image: mongo:6
+    container_name: biblioteca_mongo
+    environment:
+      MONGO_INITDB_DATABASE: biblioteca_nosql
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - biblioteca_network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── SERVICIO 3: App Python ──────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: biblioteca_app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    environment:
+      PG_HOST: postgres
+      PG_DB: biblioteca_db
+      PG_USER: postgres
+      PG_PASSWORD: Admin123*
+      MONGO_URI: mongodb://mongodb:27017/
+    volumes:
+      - ./config:/app/config
+      - ./sql:/app/sql
+      - ./logs:/app/logs
+    networks:
+      - biblioteca_network
+
+# ── VOLÚMENES Y RED ─────────────────────────────────────
+volumes:
+  postgres_data:
+  mongo_data:
+
+networks:
+  biblioteca_network:
+    driver: bridge

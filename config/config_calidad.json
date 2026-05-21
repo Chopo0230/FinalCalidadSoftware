@@ -1,0 +1,70 @@
+{
+    "reglas": {
+      "Biblioteca_Data": [
+        {
+          "campo": "titulo_libro",
+          "tipo": "text",
+          "prohibido": ["nulo", ""],
+          "longitud_min": 3
+        },
+        {
+          "campo": "autor_nombre",
+          "tipo": "text",
+          "prohibido": ["nulo", ""]
+        },
+        {
+          "campo": "fecha_publicacion",
+          "tipo": "fecha",
+          "formatos_validos": ["DD/MM/YYYY", "YYYY-MM-DD"]
+        },
+        {
+          "campo": "categoria_y_descripcion",
+          "tipo": "text",
+          "prohibido": ["nulo", ""]
+        }
+      ],
+      "Resenas_Usuarios": [
+        {
+          "campo": "calificacion",
+          "tipo": "numeric",
+          "min": 1,
+          "max": 5
+        },
+        {
+          "campo": "comentario",
+          "prohibido": ["nulo", "sin comentario", ""]
+        }
+      ],
+      "Prestamos_Crudos": [
+        {
+          "campo": "correo_usuario",
+          "tipo": "email",
+          "pattern": "^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$"
+        },
+        {
+          "campo": "estado_prestamo",
+          "valores_validos": ["ACTIVO", "DEVUELTO", "RETRASADO"]
+        }
+      ],
+      "Inventario_Sedes": [
+        {
+          "campo": "cantidad_total",
+          "tipo": "numeric",
+          "min": 0
+        },
+        {
+          "campo": "sede_nombre",
+          "tipo": "text",
+          "prohibido": ["nulo", ""]
+        }
+      ]
+    },
+    "fuzzy_matching": {
+      "umbral_similitud": 85,
+      "campos": ["titulo_libro", "autor_nombre"]
+    },
+    "data_masking": {
+      "algoritmo": "SHA-256",
+      "campos": ["correo_usuario"]
+    }
+  }
